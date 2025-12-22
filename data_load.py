@@ -1,10 +1,11 @@
 import pandas as pd
 import glob
 import re
+import os
 
 
 # usage: df = load_fourth_down_data('Data/play_by_play_*.csv')
-def load_fourth_down_data(path_pattern='play_by_play_*.csv'):
+def load_fourth_down_data(path_pattern='play_by_play_*.csv', download=True):
     dfs = []
 
     for file in glob.glob(path_pattern):
@@ -30,4 +31,17 @@ def load_fourth_down_data(path_pattern='play_by_play_*.csv'):
 
         dfs.append(df)
 
-    return pd.concat(dfs, ignore_index=True)
+    combined_df = pd.concat(dfs, ignore_index=True)
+
+    if download:
+        output_dir = os.path.dirname(path_pattern)
+
+        if output_dir == "":
+            output_path = "fourth_down_data.csv"
+        else:
+            os.makedirs(output_dir, exist_ok=True)
+            output_path = os.path.join(output_dir, "fourth_down_data.csv")
+
+        combined_df.to_csv(output_path, index=False)
+
+    return combined_df

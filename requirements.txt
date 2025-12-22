@@ -5,5 +5,3 @@ seaborn
 tensorflow
 keras
 scikit-learn
-glob
-re
