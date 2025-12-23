@@ -5,7 +5,15 @@ import data_load
 from sklearn.model_selection import train_test_split
 import tqdm
 from torch.utils.data import DataLoader, TensorDataset
+from sklearn.metrics import roc_auc_score
+import torch.nn.functional as F
+import os
 
+# Ignore warnings
+import warnings
+warnings.filterwarnings("ignore")
+
+# Define the neural network model
 class FourthDownNN(nn.Module):
     def __init__(self, input_size):
         super().__init__()
@@ -19,7 +27,8 @@ class FourthDownNN(nn.Module):
 
     def forward(self, x):
         return self.layers(x)
-    
+
+# Load and split data   
 def load_data():
     combined = data_load.load_fourth_down_data(path_pattern='Data/play_by_play_*.csv', download=False)
     X = combined[['ydstogo', 'score_differential', 'game_seconds_remaining', 'posteam_timeouts_remaining', 'yardline_100']]
@@ -32,6 +41,7 @@ def load_data():
     )
     return X_train, X_val, X_test, y_train, y_val, y_test
 
+# Train model with early stopping
 def train_model(model, train_loader, val_loader=None, epochs=10, lr=0.001, device='cpu', patience=5):
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -46,7 +56,7 @@ def train_model(model, train_loader, val_loader=None, epochs=10, lr=0.001, devic
         correct = 0
         total = 0
 
-        for X_batch, y_batch in tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}"):
+        for X_batch, y_batch in tqdm.tqdm(train_loader, desc=f"Epoch {epoch+1}/{epochs}"):
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
 
@@ -108,6 +118,7 @@ def train_model(model, train_loader, val_loader=None, epochs=10, lr=0.001, devic
         model.load_state_dict(best_model_state)
     return model
 
+# Driver function
 if __name__ == "__main__":
     X_train, X_val, X_test, y_train, y_val, y_test = load_data()
     input_size = X_train.shape[1]
@@ -130,23 +141,32 @@ if __name__ == "__main__":
 
     # Evaluate on test data
     model.eval()
-    test_loss = 0.0
-    test_correct = 0
-    test_total = 0
-    with torch.no_grad():
-        for X_test, y_test in test_loader:
-            X_test = X_test.to('cpu')
-            y_test = y_test.to('cpu')
-            outputs = model(X_test)
-            loss = nn.CrossEntropyLoss()(outputs, y_test)
-            test_loss += loss.item() * X_test.size(0)
-            _, predicted = torch.max(outputs, 1)
-            test_correct += (predicted == y_test).sum().item()
-            test_total += y_test.size(0)
 
-    avg_test_loss = test_loss / test_total
-    test_acc = test_correct / test_total
-    print(f"Test Loss={avg_test_loss:.4f}, Test Acc={test_acc:.4f}")
+    all_probs = []
+    all_labels = []
+
+    with torch.no_grad():
+        for X_batch, y_batch in test_loader:
+            X_batch = X_batch.to('cpu')
+            y_batch = y_batch.to('cpu')
+
+            outputs = model(X_batch)
+
+            # Convert logits -> probabilities
+            probs = F.softmax(outputs, dim=1)[:, 1]  # P(go=1)
+
+            all_probs.extend(probs.numpy())
+            all_labels.extend(y_batch.numpy())
+
+    # Compute metrics
+    test_auc = roc_auc_score(all_labels, all_probs)
+
+    # accuracy at 0.5 threshold
+    preds = (torch.tensor(all_probs) >= 0.5).int().numpy()
+    test_acc = (preds == all_labels).mean()
+
+    print(f"Test AUC={test_auc:.4f}, Test Acc={test_acc:.4f}")
 
     # save model
+    os.makedirs('Models', exist_ok=True)
     torch.save(model.state_dict(), 'Models/fourth_down_nn_model.pth')
