@@ -15,7 +15,7 @@ def load_model():
 model = load_model()
 
 st.title("NFL 4th Down Decision Analyzer")
-st.markdown("Enter game context to estimate the probability of **going for it** on 4th down")
+st.markdown("Enter game context to estimate the probability of going for it on 4th down or use the sliders below for what-if scenarios.")
 
 # Inputs
 st.subheader("Game Situation")
@@ -27,13 +27,16 @@ with left:
     yardline_100 = st.number_input("Yardline (100 = own goal)", 1, 99, 45)
 
     st.markdown("**Game Clock**")
-    q_col, m_col, s_col = st.columns(3)
-    with q_col:
-        quarter = st.selectbox("Q", [1, 2, 3, 4])
-    with m_col:
-        minutes = st.number_input("Min", 0, 15, 10)
-    with s_col:
-        seconds = st.number_input("Sec", 0, 59, 0)
+    quarter = st.selectbox("Quarter", [1, 2, 3, 4])
+    time_str = st.text_input("Time Remaining in Quarter (MM:SS)", "10:00")
+    try:
+        minutes, seconds = map(int, time_str.split(":"))
+        if not (0 <= minutes <= 15 and 0 <= seconds < 60):
+            st.error("Minutes must be 0-15 and seconds 0-59")
+            minutes, seconds = 10, 0
+    except ValueError:
+        st.error("Enter time in MM:SS format, e.g., 10:00")
+        minutes, seconds = 10, 0
 
 with right:
     st.markdown("**Game Context**")
