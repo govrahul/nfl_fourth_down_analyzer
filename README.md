@@ -91,6 +91,7 @@ Explore how decisions change with clock, score, and field position
 The model runs entirely on the server — users do not need to install Python or download the model.
 
 ## Project Structure
+```text
 ├── app.py                  # Streamlit frontend
 ├── model.py                # Neural network definition
 ├── data_load.py            # Data loading & preprocessing
@@ -99,6 +100,7 @@ The model runs entirely on the server — users do not need to install Python or
 │   └── fourth_down_logreg.pkl
 ├── requirements.txt
 └── README.md
+```
 
 ## Tech Stack
 
