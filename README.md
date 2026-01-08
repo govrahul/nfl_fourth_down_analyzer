@@ -66,13 +66,13 @@ Softmax output for probabilistic predictions
 
 Evaluated on a held-out test set:
 
-Test AUC: ~0.92–0.93
+* Test AUC: ~0.92–0.93
 
-Test Accuracy: ~0.91
+* Test Accuracy: ~0.91
 
-True go rate: ~14%
+* True go rate: ~14%
 
-Predicted go rate: closely matched true rate
+* Predicted go rate: closely matched true rate
 
 This indicates strong discrimination while maintaining realistic calibration.
 
@@ -80,20 +80,21 @@ This indicates strong discrimination while maintaining realistic calibration.
 
 The Streamlit app allows users to:
 
-Enter game context using intuitive scoreboard-style inputs
+* Enter game context using intuitive scoreboard-style inputs
 
-Adjust inputs using sliders for what-if analysis
+* Adjust inputs using sliders for what-if analysis
 
-View real-time probability estimates
+* View real-time probability estimates
 
-Explore how decisions change with clock, score, and field position
+* Explore how decisions change with clock, score, and field position
 
 The model runs entirely on the server — users do not need to install Python or download the model.
 
 ## Project Structure
 ```text
 ├── app.py                  # Streamlit frontend
-├── model.py                # Neural network definition
+├── modeling.py             # Logistic regression definition
+├── modeling_nn.py          # Neural network definition
 ├── data_load.py            # Data loading & preprocessing
 ├── Models/
 │   └── fourth_down_nn_model.pth
@@ -104,17 +105,19 @@ The model runs entirely on the server — users do not need to install Python or
 
 ## Tech Stack
 
-Python
+* Python
 
-PyTorch
+* PyTorch
 
-scikit-learn
+* scikit-learn
 
-pandas / NumPy
+* TensorFlow
 
-Streamlit
+* pandas / NumPy
 
-GitHub + Streamlit Cloud
+* Streamlit
+
+* GitHub + Streamlit Cloud
 
 ## Notes & Limitations
 
@@ -122,25 +125,23 @@ The model predicts historical decision behavior, not necessarily optimal strateg
 
 Does not explicitly account for:
 
-kicker quality
+* kicker quality
 
-weather
+* weather
 
-team-specific tendencies
+* team-specific tendencies
 
 Overtime scenarios are not currently modeled
 
 ## Future Work
 
-Add overtime support
+* Add overtime support
 
-Incorporate team- or coach-specific effects
+* Incorporate team- or coach-specific effects
 
-Add model interpretability tools (e.g., SHAP-style explanations)
+* Compare predicted decisions to analytically optimal choices
 
-Compare predicted decisions to analytically optimal choices
-
-Log anonymized usage patterns to study decision sensitivity
+* Log anonymized usage patterns to study decision sensitivity
 
 ## Author
 
