@@ -34,6 +34,9 @@ with left:
         if not (0 <= minutes <= 15 and 0 <= seconds < 60):
             st.error("Minutes must be 0-15 and seconds 0-59")
             minutes, seconds = 10, 0
+        if (minutes == 15 and seconds > 0):
+            st.error("At most 15:00 allowed")
+            minutes, seconds = 10, 0
     except ValueError:
         st.error("Enter time in MM:SS format, e.g., 10:00")
         minutes, seconds = 10, 0
