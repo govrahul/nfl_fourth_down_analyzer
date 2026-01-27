@@ -2,8 +2,8 @@ pandas
 numpy
 matplotlib
 seaborn
-tensorflow
-keras
+#tensorflow
+#keras
 scikit-learn
 torch
 tqdm
